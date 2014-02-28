@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+    <!--
+         Filter messages with some Marker (see eu.dm2e.logback.LogbackMarkers)
+         DENY: deny it, even if other filters accept it
+         NEUTRAL: do nothing
+         ACCEPT: accept it, even if other filters deny it
+      -->
+    <turboFilter class="ch.qos.logback.classic.turbo.MarkerFilter">
+        <Marker>HTTP_RESPONSE_DUMP</Marker>
+        <!--<OnMatch>ACCEPT</OnMatch>-->
+        <OnMatch>DENY</OnMatch>
+    </turboFilter>
+    <turboFilter class="ch.qos.logback.classic.turbo.MarkerFilter">
+        <Marker>DATA_DUMP</Marker>
+        <!-- 		<OnMatch>ACCEPT</OnMatch> -->
+        <OnMatch>DENY</OnMatch>
+    </turboFilter>
+    <turboFilter class="ch.qos.logback.classic.turbo.MarkerFilter">
+        <Marker>SENSITIVE_INFORMATION</Marker>
+        <OnMatch>DENY</OnMatch>
+    </turboFilter>
+    <turboFilter class="ch.qos.logback.classic.turbo.MarkerFilter">
+        <Marker>SERVER_COMMUNICATION</Marker>
+        <OnMatch>ACCEPT</OnMatch>
+    </turboFilter>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+
+        <!--  ANSI coloring -->
+        <!-- 	    <withJansi>true</withJansi> -->
+
+        <!--
+          See http://logback.qos.ch/manual/layouts.html
+          encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder by default
+           -->
+
+    </appender>
+
+    <!--
+         Log File appender
+     -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>log/dm2e-ws.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--
+                   hourly rollover
+                   log/dm2e-ws.log
+                   log/2013-07-05/dm2e-ws.2013-07-05_11.log
+                   ...
+               -->
+            <fileNamePattern>log/%d{yyyy-MM-dd,aux}/dm2e-ws.%d{yyyy-MM-dd_HH}.log</fileNamePattern>
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>720</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <Pattern>%level [%logger.%method:%line%markerWithSeparator] %m%n</Pattern>
+        </encoder>
+    </appender>
+
+    <!-- <logger name="eu.dm2e.grafeo.gom" level="DEBUG" />        -->
+    <logger name="eu.dm2e.grafeo" level="WARN" />
+    <logger name="eu.dm2e.direct" level="INFO" />
+    <logger name="org.apache" level="WARN" />
+    <logger name="org.eclipse" level="WARN" />
+    <logger name="org.glassfish" level="WARN" />
+    <logger name="com.hp.hpl" level="WARN" />
+
+
+    <root level="ERROR">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+    </root>
+
+</configuration>
