@@ -1,7 +1,13 @@
 package jlodke.scraper;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,16 +113,40 @@ public class GraphBuilder {
 		{
 			g.getObjectMapper().addObject(concepts.get(key));
 		}
-		System.out.println("Triples:");
-		System.out.println(g.getNTriples());
+		
+		System.out.println("Saving Triples...");
+		writeToFile("D:/RDF_JUDAICALINK/triples_A.txt", g.getNTriples());
+		
+		System.out.println("Saving TTL...");
+		writeToFile("D:/RDF_JUDAICALINK/turtle_A.rdf", g.getTurtle());		
+		
+		System.out.println("Saving Terse TTL...");
+		writeToFile("D:/RDF_JUDAICALINK/terse_turtle_A.rdf", g.getTerseTurtle());		
 		
 		System.out.println("Putting triples to endpoint...");
-		g.putToEndpoint("http://lelystad.informatik.uni-mannheim.de:3031/judaicalink/update", "htttp://g1test"); 
-		
-		System.out.println("Turtle:");
-		System.out.println(g.getTerseTurtle());
-		
+		g.putToEndpoint("http://lelystad.informatik.uni-mannheim.de:3031/judaicalink/update", "http://Rujen"); 
+				
 		System.out.println("Process finished execution.");
+	}
+	
+	private void writeToFile(String path, String data) {
+		BufferedWriter out = null;
+		try {
+			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8"));
+			out.write(data);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+		    try {
+				out.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private List<Page> getCollectionOfPages(String url) throws Exception
@@ -129,7 +159,7 @@ public class GraphBuilder {
 			{
 				List<Link> resultLinks = getListOfPagesToDownload(url);	
 				System.out.println("Links retrieval finished");
-				pages = downloadPagesSelection(resultLinks, 0, 5/*resultLinks.size()*/);	
+				pages = downloadPagesSelection(resultLinks, 0, resultLinks.size());
 			}
 		}
 		else
@@ -246,7 +276,7 @@ public class GraphBuilder {
 			arr[i]="<a "+arr[i];
 			arr[i] = arr[i].substring(0, arr[i].indexOf("</a>")+4);
 			listOfLinks.add(createLink(arr[i]));							
-			System.out.println("	Links processing: page "+(i+1)+" out of "+arr.length+" processed");
+			System.out.println("	Links processing: page "+(i)+" out of "+(arr.length-1)+" processed");
 		}		
 		return listOfLinks;
 	}
