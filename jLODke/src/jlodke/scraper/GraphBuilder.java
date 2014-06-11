@@ -159,7 +159,7 @@ public class GraphBuilder {
 			{
 				List<Link> resultLinks = getListOfPagesToDownload(url);	
 				System.out.println("Links retrieval finished");
-				pages = downloadPagesSelection(resultLinks, 0, resultLinks.size());
+				pages = downloadPagesSelection(resultLinks, 272, 275);//resultLinks.size()
 			}
 		}
 		else
@@ -169,7 +169,7 @@ public class GraphBuilder {
 		return pages;
 	}
 	
-	private List<Page> downloadPagesSelection(List<Link> links, int startIndex, int offset) throws Exception
+	private List<Page> downloadPagesSelection(List<Link> links, int startIndex, int offset) 
 	{
 		List<Page> result = new ArrayList<Page>();
 		for (int i=startIndex;i<offset;i++)
@@ -178,13 +178,21 @@ public class GraphBuilder {
 			Page page = new Page();
 			page.setOwnLink(lnk);
 			page.setHeader(lnk.getText());
-			String pageContent = executeWebHarvest(ScraperConfigGenerator.prepareGetStarterSet(baseURL + lnk.getUrl(), filters.get("MainBlockContent"))).toString("UTF-8");
-			page.setRawHtml(pageContent);
-			String cleanedContent = executeWebHarvest(ScraperConfigGenerator.prepareGetStarterSet(baseURL + lnk.getUrl(), filters.get("MainBlockContentCleaned"))).toString("UTF-8");
-			page.setCleanedContent(cleanedContent);
-			page.setOutgoingLinks(getLinks(pageContent));
+			try {				
+				String pageContent = executeWebHarvest(ScraperConfigGenerator.prepareGetStarterSet(baseURL + lnk.getUrl(), filters.get("MainBlockContent"))).toString("UTF-8");
+				page.setRawHtml(pageContent);
+				String cleanedContent = executeWebHarvest(ScraperConfigGenerator.prepareGetStarterSet(baseURL + lnk.getUrl(), filters.get("MainBlockContentCleaned"))).toString("UTF-8");
+				page.setCleanedContent(cleanedContent);
+				page.setOutgoingLinks(getLinks(pageContent));
+			} catch (Exception e) {
+				page.setRawHtml("Exception: " + e.getMessage());
+				page.setCleanedContent("Exception: " + e.getMessage());
+				page.setOutgoingLinks(null);
+			}
 			result.add(page);
-			System.out.println("	Page (content): "+new String(page.getHeader().getBytes("UTF-8"), "UTF-8")+" number "+i+" downloaded");
+			try {
+				System.out.println("	Page (content): "+new String(page.getHeader().getBytes("UTF-8"), "UTF-8")+" number "+i+" downloaded");
+			} catch (UnsupportedEncodingException ex) { System.out.println("	Page (content) number " +i+": exception happened" + ex.getStackTrace());}			
 		}
 		System.out.println("Page (content) set from "+startIndex+ " to "+offset+ " retrieved (Total: " + String.valueOf(offset-startIndex)+")");
 		return result;
